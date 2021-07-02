@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { TestTreeItem, TestTreeProvider } from './TestTreeProvider';
+import { WorkTimeTreeItem, WorkTimesTreeProvider } from './WorkTimesTreeProvider';
+import { WorkTime, WorkTimeJSON } from './timing/WorkTime';
 
 class DisposableRegistrar {
 	readonly context: vscode.ExtensionContext;
@@ -11,28 +12,32 @@ class DisposableRegistrar {
 	}
 }
 
-var edits:string[] = [];
-var tp:TestTreeProvider;
-var vyu:vscode.TreeView<TestTreeItem>;
+var timesTreeProvider:WorkTimesTreeProvider;
+var timesTreeView:vscode.TreeView<WorkTimeTreeItem>;
+var workTimesJSON:WorkTimeJSON[] = [
+	["coding",348,9758],
+	["idle",98533555,98533555],
+	["browsing",3768909876,3768909876]
+];
+var workTimes:WorkTime[] = workTimesJSON.map(v=>WorkTime.createFromJSON(v));
 
 export function activate(context: vscode.ExtensionContext) {
 	const dump = new DisposableRegistrar(context);
 
-	tp = new TestTreeProvider(edits);
 
-	dump.add(vscode.window.registerTreeDataProvider("vyu",tp));
-	vyu = vscode.window.createTreeView("vyu", {treeDataProvider:tp});
+	timesTreeProvider = new WorkTimesTreeProvider(workTimes);
+
+	dump.add(vscode.window.registerTreeDataProvider("apc-times",timesTreeProvider));
+	//timesTreeView = vscode.window.createTreeView("apc-times", {treeDataProvider:timesTreeProvider});
 	
 
 	dump.add(vscode.workspace.onDidChangeTextDocument(e => {
-		for (let k of e.contentChanges) {
-			edits.push(k.text+":"+k.rangeOffset);
-			console.log(edits);
-		}
-		tp.refresh();
+		for (let k of e.contentChanges)
+			console.log(k);
+		timesTreeProvider.refresh();
 	}));
 	
-	dump.add(vscode.commands.registerCommand('vsx-autopunchclock.helloWorld', () => {
+	dump.add(vscode.commands.registerCommand('vsx-autopunchclock.showMenu', () => {
 		vscode.window.showInformationMessage('Hello World from vsx-autopunchclock!');
 	}));
 }

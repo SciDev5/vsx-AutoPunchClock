@@ -1,6 +1,6 @@
 {
 	"name": "vsx-autopunchclock",
-	"displayName": "vsx-autopunchclock",
+	"displayName": "AutoPunchClock",
 	"description": "Keeps track of active work time in a workspace for you.",
 	"version": "0.0.1",
 	"engines": {
@@ -14,16 +14,20 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"keybindings": {
+			"command": "vsx-autopunchclock.showMenu",
+			"key": "ctrl+alt+t"
+		},
 		"views": {
-			"test": [{
-				"id": "vyu",
-				"name": "View lol"
+			"scm": [{
+				"id": "apc-times",
+				"name": "AutoPunchClock"
 			}]
 		},
 		"commands": [
 			{
-				"command": "vsx-autopunchclock.helloWorld",
-				"title": "Hello World"
+				"command": "vsx-autopunchclock.showMenu",
+				"title": "AutoPunchClock: Show Menu"
 			}
 		]
 	},
