@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { WorkTimesTreeProvider, WorkTimesTreeItem } from './work-time-tree/WorkTimesTreeProvider';
-import { WorkInstanceTreeItem } from "./work-time-tree/WorkTimeItem";
 import { WorkTime, WorkTimeJSON } from './timing/WorkTime';
+import { Tracker } from './timing/Tracker';
 
 class DisposableRegistrar {
 	readonly context: vscode.ExtensionContext;
@@ -15,33 +15,44 @@ class DisposableRegistrar {
 
 var timesTreeProvider:WorkTimesTreeProvider;
 var timesTreeView:vscode.TreeView<WorkTimesTreeItem>;
-var workTimesJSON:WorkTimeJSON[] = [
-	["coding",348,2233],
-	["idle",0,0],
-	["browsing",Date.now(),100000000000000],
-	["browsing",Date.now()-24*60*60*1000,0],
-	["browsing",Date.now()-2*24*60*60*1000,0],
-	["browsing",Date.now()-8*24*60*60*1000,0],
-	["browsing",Date.now()-18*24*60*60*1000,0],
-	["browsing",Date.now()-40*24*60*60*1000,0]
-];
-var workTimes:WorkTime[] = workTimesJSON.map(v=>WorkTime.createFromJSON(v));
+var workTimes:WorkTime[] = [];
+var tracker:Tracker;
+
+function onCodeAction() {
+	console.log("code action");
+	tracker.onCode();
+	timesTreeProvider.refresh();
+}
+function onBrowseAction() {
+	console.log("browse action");
+	tracker.onBrowse();
+	timesTreeProvider.refresh();
+}
+
 
 export function activate(context: vscode.ExtensionContext) {
 	const dump = new DisposableRegistrar(context);
 
+	tracker = new Tracker(workTimes);
 
 	timesTreeProvider = new WorkTimesTreeProvider(workTimes);
 
 	dump.add(vscode.window.registerTreeDataProvider("apc-times",timesTreeProvider));
 	timesTreeView = vscode.window.createTreeView("apc-times", {treeDataProvider:timesTreeProvider});
 	
+	// Add events which count as actively coding.
+	dump.add(vscode.workspace.onDidChangeTextDocument(onCodeAction));
+	dump.add(vscode.workspace.onDidCreateFiles(onCodeAction));
+	dump.add(vscode.workspace.onDidDeleteFiles(onCodeAction));
+	dump.add(vscode.workspace.onDidRenameFiles(onCodeAction));
+	dump.add(vscode.workspace.onDidSaveTextDocument(onCodeAction));
 
-	dump.add(vscode.workspace.onDidChangeTextDocument(e => {
-		for (let k of e.contentChanges)
-			console.log(k);
-		timesTreeProvider.refresh();
-	}));
+	// Add events which count as browsing the workspace.
+	dump.add(vscode.window.onDidChangeActiveTextEditor(onBrowseAction));
+	dump.add(vscode.window.onDidChangeTextEditorViewColumn(onBrowseAction));
+	dump.add(vscode.window.onDidChangeTextEditorVisibleRanges(onBrowseAction));
+	dump.add(vscode.window.onDidChangeTextEditorSelection(onBrowseAction));
+	dump.add(vscode.window.onDidChangeVisibleTextEditors(onBrowseAction));
 	
 	dump.add(vscode.commands.registerCommand('vsx-autopunchclock.showMenu', () => {
 		vscode.window.showInformationMessage('Hello World from vsx-autopunchclock!');

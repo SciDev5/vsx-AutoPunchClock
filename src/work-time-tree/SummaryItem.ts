@@ -19,7 +19,5 @@ export class WorkSummaryItem extends vscode.TreeItem implements ChildWieldingIte
         return `${type}: ${timeText}`;
     }
 
-    getChildren(provider: WorkTimesTreeProvider): WorkTimesTreeItem[] {
-        throw new Error("Method not implemented.");
-    }
+    getChildren(provider: WorkTimesTreeProvider): WorkTimesTreeItem[] { return [] }
 }

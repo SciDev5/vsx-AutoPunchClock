@@ -16,6 +16,8 @@ export class WorkTime {
     getTime(which:"start"|"end"): Date | undefined { return this.time[which] }
     get start() { return this.time.start }
     get end() { return this.time.end || new Date() }
+    set start(v) { if (v && (v instanceof Date)) this.time.start = v; }
+    set end(v) { if (v && (v instanceof Date)) this.time.end = v; }
     get endIsNow() { return this.time.end === undefined }
     
     /** The length of time the user was working. */

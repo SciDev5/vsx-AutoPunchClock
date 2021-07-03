@@ -7,7 +7,5 @@ export class WorkInstanceTreeItem extends vscode.TreeItem implements ChildWieldi
         super(workTime.start.toLocaleTimeString());
     }
 
-    getChildren(provider: WorkTimesTreeProvider): WorkTimesTreeItem[] {
-        return [];
-    }
+    getChildren(provider: WorkTimesTreeProvider): WorkTimesTreeItem[] { return [] }
 }
