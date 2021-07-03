@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { WorkTimeTreeItem, WorkTimesTreeProvider } from './WorkTimesTreeProvider';
+import { WorkTimesTreeProvider, WorkTimesTreeItem } from './work-time-tree/WorkTimesTreeProvider';
+import { WorkInstanceTreeItem } from "./work-time-tree/WorkTimeItem";
 import { WorkTime, WorkTimeJSON } from './timing/WorkTime';
 
 class DisposableRegistrar {
@@ -13,11 +14,16 @@ class DisposableRegistrar {
 }
 
 var timesTreeProvider:WorkTimesTreeProvider;
-var timesTreeView:vscode.TreeView<WorkTimeTreeItem>;
+var timesTreeView:vscode.TreeView<WorkTimesTreeItem>;
 var workTimesJSON:WorkTimeJSON[] = [
-	["coding",348,9758],
-	["idle",98533555,98533555],
-	["browsing",3768909876,3768909876]
+	["coding",348,2233],
+	["idle",0,0],
+	["browsing",Date.now(),100000000000000],
+	["browsing",Date.now()-24*60*60*1000,0],
+	["browsing",Date.now()-2*24*60*60*1000,0],
+	["browsing",Date.now()-8*24*60*60*1000,0],
+	["browsing",Date.now()-18*24*60*60*1000,0],
+	["browsing",Date.now()-40*24*60*60*1000,0]
 ];
 var workTimes:WorkTime[] = workTimesJSON.map(v=>WorkTime.createFromJSON(v));
 
@@ -28,7 +34,7 @@ export function activate(context: vscode.ExtensionContext) {
 	timesTreeProvider = new WorkTimesTreeProvider(workTimes);
 
 	dump.add(vscode.window.registerTreeDataProvider("apc-times",timesTreeProvider));
-	//timesTreeView = vscode.window.createTreeView("apc-times", {treeDataProvider:timesTreeProvider});
+	timesTreeView = vscode.window.createTreeView("apc-times", {treeDataProvider:timesTreeProvider});
 	
 
 	dump.add(vscode.workspace.onDidChangeTextDocument(e => {

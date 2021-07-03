@@ -19,7 +19,7 @@ export class WorkTime {
     get endIsNow() { return this.time.end === undefined }
     
     /** The length of time the user was working. */
-    get length() { return (this.time.end || new Date()).getTime() - this.time.start.getTime() }
+    get length() { return Math.max(0, (this.time.end || new Date()).getTime() - this.time.start.getTime()) }
     
     /** Get the current WorkTime the user is being timed using. */
     static get currentWorkTime() { return this._currentWorkTime }
